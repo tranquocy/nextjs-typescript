@@ -23,7 +23,7 @@ export default function Posts (props: AppProps) {
 }
 
 export const getStaticProps: GetStaticProps<AppProps> = async (context: GetStaticPropsContext) => {
-  const res = await fetch('http://localhost:3000/api/products')
+  const res = await fetch('https://js-post-api.herokuapp.com/api/posts?_page=1')
   const data = await res.json()
 
   return {
