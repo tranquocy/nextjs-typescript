@@ -1,43 +1,56 @@
-import { GetStaticPaths, GetStaticProps, GetStaticPropsContext } from 'next';
-import * as React from 'react';
+import { GetStaticPaths, GetStaticProps, GetStaticPropsContext } from 'next'
+import { useRouter } from 'next/dist/client/router'
+import * as React from 'react'
 
-export interface AppProps {
-  post: any
+export interface PostPageProps {
+	post: any
 }
 
-export default function PostDetails ( {post}: AppProps) {
-  if (!post) return null
-  return (
-    <div>
-      <p>{post.title}</p>
-    </div>
-  );
+export default function PostDetailPage({ post }: PostPageProps) {
+	const router = useRouter()
+
+	if (router.isFallback) {
+		return <div style={{ fontSize: '2rem', textAlign: 'center' }}>Loading...</div>
+	}
+
+	if (!post) return null
+
+	return (
+		<div>
+			<h1>Post Detail Page</h1>
+
+			<p>{post.title}</p>
+			<p>{post.author}</p>
+			<p>{post.description}</p>
+		</div>
+	)
 }
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const res = await fetch('https://js-post-api.herokuapp.com/api/posts?_page=1')
-  const data = await res.json()
-  
-  return {
-    paths: data.data.map((post:any) => ({params: {postId: post.id}})),
-    fallback: false
-  }
+	console.log('\nGET STATIC PATHS')
+	const response = await fetch('https://js-post-api.herokuapp.com/api/posts?_page=1')
+	const data = await response.json()
+
+	return {
+		paths: data.data.map((post: any) => ({ params: { postId: post.id } })),
+		fallback: true,
+	}
 }
 
-export const getStaticProps: GetStaticProps<AppProps> = async (context: GetStaticPropsContext) => {
-  console.log(context);
-  
-  const postId = context.params?.postId
+export const getStaticProps: GetStaticProps<PostPageProps> = async (
+	context: GetStaticPropsContext
+) => {
+	console.log('\nGET STATIC PROPS', context.params?.postId)
+	const postId = context.params?.postId
+	if (!postId) return { notFound: true }
 
-  if (!postId) return { notFound: true}
-  
-  const res = await fetch(`https://js-post-api.herokuapp.com/api/posts/${postId}`)
-  const data = await res.json()
-  console.log(data);
-  
-  return {
-    props: {
-      post: data
-    }
-  }
+	const response = await fetch(`https://js-post-api.herokuapp.com/api/posts/${postId}`)
+	const data = await response.json()
+
+	return {
+		props: {
+			post: data,
+		},
+		revalidate: 300,
+	}
 }

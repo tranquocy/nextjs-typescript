@@ -1,47 +1,75 @@
-import React, { useEffect, useState } from 'react';
+import { Header } from '@/components/common/header'
+import { AdminLayout } from '@/components/layout'
+import { useRouter } from 'next/router'
+import React, { useEffect, useState } from 'react'
+// import dynamic from 'next/dynamic'
+import { Box, Typography } from '@mui/material'
 
-import dynamic from 'next/dynamic';
-import { useRouter } from 'next/router';
+// const Header = dynamic(() => import('@/components/common/header'), { ssr: false })
 
-export interface AppProps {}
+export interface AboutPageProps {}
 
-const Header = dynamic(() => import('@/components/common/header'), { ssr: false })
-
-export default function About (props: AppProps) {
+export default function AboutPage(props: AboutPageProps) {
   const [postList, setPostList] = useState([])
   const router = useRouter()
-  const page = Number(router.query?.page)
+
+  console.log('About query: ', router.query)
+  const page = router.query?.page
 
   useEffect(() => {
+    if (!page) return
     ;(async () => {
-      const res = await fetch(`https://js-post-api.herokuapp.com/api/posts?_page=${page}`)
-      const data = await res.json()
+      const response = await fetch(`https://js-post-api.herokuapp.com/api/posts?_page=${page}`)
+      const data = await response.json()
+
       setPostList(data.data)
     })()
   }, [page])
 
-  const handleClickNext = () => {
+  function handleNextClick() {
     router.push(
       {
         pathname: '/about',
         query: {
-          page: (page || 1) + 1
-        }
+          page: (Number(page) || 1) + 1,
+        },
       },
       undefined,
-      {shallow: true}
+      { shallow: true }
     )
   }
 
   return (
-    <div>
+    <Box>
+      <Typography component="h1" variant="h3" color="primary.main">
+        About Page
+      </Typography>
+
       <Header />
-      <ul>
-        {postList?.map((item: any) => (
-          <li key={item.id}>{item.title}</li>
+
+      <ul className="post-list">
+        {postList.map((post: any) => (
+          <li key={post.id}>{post.title}</li>
         ))}
       </ul>
-      <button onClick={handleClickNext}>Next</button>
-    </div>
-  );
+
+      <button onClick={handleNextClick}>Next page</button>
+    </Box>
+  )
 }
+
+AboutPage.Layout = AdminLayout
+
+export async function getStaticProps() {
+  console.log('get static props')
+
+  return {
+    props: {},
+  }
+}
+
+// export async function getServerSideProps() {
+// 	return {
+// 		props: {}, // will be passed to the page component as props
+// 	}
+// }

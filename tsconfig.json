@@ -13,12 +13,11 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
-    "incremental": true,
     "baseUrl": ".",
     "paths": {
-      "@/components/*": ["./components/*"],
-      "@/styles/*": ["./styles/*"],
-      "@/constants/*": ["./constants/*"],
+      "@/*": ["./*"],
+			"@/api": ["./api-client.ts"],
+			"@/api/*": ["./api-client/*"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
